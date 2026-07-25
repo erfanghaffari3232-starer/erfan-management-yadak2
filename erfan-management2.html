@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت عرفان | لوازم یدکی</title>
+    <style>
+        :root{--primary:#e94560;--gold:#f39c12;--green:#4ade80;--blue:#38bdf8;--dark:#0a0a0f;--card:#1e293b;--border:rgba(255,255,255,0.06);--text:#94a3b8}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Tahoma;background:var(--dark);min-height:100vh;padding:15px;color:white}
+        .container{max-width:900px;margin:0 auto}
+        
+        .header{background:linear-gradient(135deg,var(--primary),#c73652);color:white;padding:20px 25px;border-radius:18px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+        .header h1{font-size:1.6rem;display:flex;align-items:center;gap:8px}
+        .header .user{background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:25px;font-size:0.85rem}
+        .header .date{font-size:0.8rem;opacity:0.8}
+        
+        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:15px}
+        .stat{background:var(--card);padding:16px;border-radius:14px;text-align:center;border:1px solid var(--border);transition:0.3s}
+        .stat:hover{transform:translateY(-3px);border-color:var(--primary)}
+        .stat .val{font-size:1.6rem;font-weight:bold}
+        .stat .lbl{font-size:0.7rem;color:var(--text);margin-top:4px}
+        .stat.c1 .val{color:var(--primary)}.stat.c2 .val{color:var(--gold)}.stat.c3 .val{color:var(--green)}.stat.c4 .val{color:var(--blue)}
+        
+        .tabs{display:flex;gap:5px;margin-bottom:15px;overflow-x:auto;background:var(--card);border-radius:14px;padding:6px}
+        .tab{flex:1;min-width:70px;background:transparent;color:var(--text);border:none;padding:12px 10px;border-radius:10px;cursor:pointer;font-family:Tahoma;font-size:0.78rem;text-align:center;transition:0.3s;white-space:nowrap}
+        .tab.active{background:var(--primary);color:white}
+        
+        .panel{display:none;animation:fade 0.3s}
+        .panel.show{display:block}
+        @keyframes fade{from{opacity:0}to{opacity:1}}
+        
+        .card{background:var(--card);border-radius:14px;padding:20px;margin-bottom:12px;border:1px solid var(--border)}
+        .card h3{color:var(--gold);margin-bottom:14px;font-size:1rem;display:flex;align-items:center;gap:8px}
+        
+        .form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+        .form-row input,.form-row select{flex:1;min-width:120px;background:rgba(0,0,0,0.3);border:1px solid var(--border);padding:12px 15px;border-radius:10px;color:white;font-family:Tahoma;font-size:0.9rem;transition:0.3s}
+        .form-row input:focus,.form-row select:focus{outline:none;border-color:var(--primary)}
+        select option{background:var(--card);color:white}
+        
+        .btn{padding:12px 22px;border-radius:10px;cursor:pointer;font-family:Tahoma;font-weight:bold;font-size:0.9rem;border:none;transition:0.3s;color:white;background:var(--primary)}
+        .btn:hover{opacity:0.85;transform:translateY(-1px)}
+        .btn.green{background:var(--green);color:#000}
+        .btn.gold{background:var(--gold);color:#000}
+        .btn.blue{background:var(--blue);color:#000}
+        .btn.small{padding:6px 12px;font-size:0.75rem}
+        
+        .search-bar{margin-bottom:12px}
+        .search-bar input{width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border);padding:12px 15px;border-radius:25px;color:white;font-family:Tahoma;font-size:0.9rem}
+        .search-bar input:focus{outline:none;border-color:var(--primary)}
+        
+        .code-search{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+        .code-search input{flex:1;background:rgba(0,0,0,0.3);border:1px solid var(--border);padding:14px 18px;border-radius:12px;color:white;font-family:'Courier New',monospace;font-size:1.1rem;text-align:center;letter-spacing:2px}
+        .code-search input:focus{outline:none;border-color:var(--green)}
+        .code-search .result{background:var(--card);padding:12px 16px;border-radius:12px;margin-top:8px;border:1px solid var(--border)}
+        
+        table{width:100%;border-collapse:collapse;font-size:0.82rem}
+        th{background:rgba(0,0,0,0.2);color:var(--gold);padding:12px 8px;text-align:right;border-bottom:2px solid var(--border);font-size:0.75rem}
+        td{padding:10px 8px;border-bottom:1px solid var(--border)}
+        tr:hover td{background:rgba(255,255,255,0.02)}
+        .low{color:#f87171;font-weight:bold}
+        .code{color:var(--gold);font-family:'Courier New',monospace;font-size:0.8rem;cursor:pointer}
+        .code:hover{background:rgba(243,156,18,0.2);border-radius:4px}
+        
+        .tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem}
+        .tag.in{background:rgba(74,222,128,0.2);color:var(--green)}
+        .tag.out{background:rgba(248,113,113,0.2);color:#f87171}
+        
+        .list-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:0.85rem;flex-wrap:wrap;gap:8px}
+        .list-item .amount{font-weight:bold}
+        .list-item .amount.plus{color:var(--green)}.list-item .amount.minus{color:#f87171}
+        
+        .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 22px;border-radius:25px;font-weight:bold;z-index:999;display:none;box-shadow:0 8px 25px rgba(0,0,0,0.3)}
+        .toast.show{display:block;animation:toastIn 0.3s}
+        @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-15px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+        
+        .empty{text-align:center;color:#666;padding:30px}
+        .highlight{color:var(--primary);font-weight:bold}
+        
+        @media(max-width:600px){.form-row{flex-direction:column}.stats{grid-template-columns:repeat(2,1fr)}}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div><h1>🔧 سیستم مدیریت عرفان</h1><div class="date" id="headerDate"></div></div>
+        <div class="user">👨‍💼 عرفان غفاری | مدیر</div>
+    </div>
+    
+    <div class="stats" id="statsRow"></div>
+    
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('stock')">📦 انبار</button>
+        <button class="tab" onclick="switchTab('sell')">🛒 فروش</button>
+        <button class="tab" onclick="switchTab('buy')">📥 خرید</button>
+        <button class="tab" onclick="switchTab('debt')">💰 حساب‌ها</button>
+        <button class="tab" onclick="switchTab('customers')">👥 مشتریان</button>
+        <button class="tab" onclick="switchTab('report')">📊 گزارش</button>
+    </div>
+    
+    <!-- انبار -->
+    <div class="panel show" id="stockPanel">
+        <div class="search-bar"><input type="text" id="stockSearch" placeholder="🔍 جستجو در انبار (نام، برند، کد)..." oninput="renderStock()"></div>
+        <div class="card">
+            <h3>➕ افزودن قطعه جدید</h3>
+            <div class="form-row">
+                <input type="text" id="partName" placeholder="نام قطعه *">
+                <input type="text" id="partBrand" placeholder="برند">
+                <input type="text" id="partCar" placeholder="مناسب خودرو">
+            </div>
+            <div class="form-row">
+                <input type="number" id="partQty" placeholder="تعداد *" value="1" min="1">
+                <input type="number" id="partBuyPrice" placeholder="قیمت خرید (تومان)">
+                <input type="number" id="partSellPrice" placeholder="قیمت فروش (تومان)">
+                <button class="btn" onclick="addPart()">➕ ثبت</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>📦 موجودی انبار (<span id="stockCount">0</span>)</h3>
+            <p style="font-size:0.75rem;color:var(--text);margin-bottom:8px">💡 روی <b>کد</b> کلیک کن تا کپی بشه | توی بخش فروش با کد سرچ کن</p>
+            <div style="overflow-x:auto"><table id="stockTable"><tr><th>کد</th><th>قطعه</th><th>برند</th><th>خودرو</th><th>تعداد</th><th>خرید</th><th>فروش</th><th>عملیات</th></tr></table></div>
+        </div>
+    </div>
+    
+    <!-- فروش -->
+    <div class="panel" id="sellPanel">
+        <div class="card">
+            <h3>🔍 جستجو با کد کالا</h3>
+            <div class="code-search">
+                <input type="text" id="sellCode" placeholder="کد کالا رو اینجا بزن..." oninput="searchByCode()" autocomplete="off">
+            </div>
+            <div id="codeResult"></div>
+        </div>
+        <div class="card">
+            <h3>🛒 فروش کالا</h3>
+            <div class="form-row">
+                <select id="sellPart" onchange="fillSellInfo()"><option value="">یا از لیست انتخاب کن...</option></select>
+                <input type="number" id="sellQty" placeholder="تعداد" value="1" min="1">
+                <input type="text" id="sellCustomer" placeholder="نام مشتری">
+            </div>
+            <p style="margin:10px 0;font-size:0.9rem">💰 قیمت واحد: <b id="sellUnitPrice">-</b> | 📦 موجودی: <b id="sellStock">-</b></p>
+            <button class="btn green" onclick="sellItem()">💳 ثبت فروش</button>
+        </div>
+        <div class="card"><h3>📋 فروش‌های امروز</h3><div id="todaySales"></div></div>
+    </div>
+    
+    <!-- خرید -->
+    <div class="panel" id="buyPanel">
+        <div class="card">
+            <h3>📥 ثبت خرید جدید</h3>
+            <div class="form-row">
+                <input type="text" id="buyName" placeholder="نام قطعه *">
+                <input type="number" id="buyQty" placeholder="تعداد" value="1" min="1">
+                <input type="number" id="buyPrice" placeholder="قیمت کل (تومان)">
+            </div>
+            <div class="form-row">
+                <input type="text" id="buySeller" placeholder="فروشنده">
+                <button class="btn gold" onclick="addBuy()">📥 ثبت خرید</button>
+            </div>
+        </div>
+        <div class="card"><h3>📋 تاریخچه خرید</h3><div id="buyList"></div></div>
+    </div>
+    
+    <!-- حساب‌ها -->
+    <div class="panel" id="debtPanel">
+        <div class="card">
+            <h3>💰 ثبت بدهکاری/طلب</h3>
+            <div class="form-row">
+                <select id="debtType"><option value="debt">طلب از دیگران</option><option value="credit">بدهی به دیگران</option></select>
+                <input type="text" id="debtPerson" placeholder="نام شخص/مغازه *">
+                <input type="number" id="debtAmount" placeholder="مبلغ (تومان) *">
+            </div>
+            <div class="form-row">
+                <input type="text" id="debtDesc" placeholder="توضیحات...">
+                <button class="btn blue" onclick="addDebt()">📝 ثبت</button>
+            </div>
+        </div>
+        <div class="card"><h3>📋 حساب‌ها</h3><div id="debtList"></div></div>
+    </div>
+    
+    <!-- مشتریان -->
+    <div class="panel" id="customersPanel">
+        <div class="card"><h3>👥 مشتریان (از روی فروش‌ها)</h3><div id="customersList"></div></div>
+    </div>
+    
+    <!-- گزارش -->
+    <div class="panel" id="reportPanel">
+        <div class="card"><h3>📊 گزارش کلی</h3><div id="reportContent"></div></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var stock=JSON.parse(localStorage.getItem('erfan_stock')||'[]');
+var sales=JSON.parse(localStorage.getItem('erfan_sales')||'[]');
+var buys=JSON.parse(localStorage.getItem('erfan_buys')||'[]');
+var debts=JSON.parse(localStorage.getItem('erfan_debts')||'[]');
+
+function generateCode(id){return 'ERF-'+id.toString(36).toUpperCase().padStart(4,'0')}
+function decodeCode(code){return parseInt(code.replace('ERF-',''),36)}
+
+function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
+function switchTab(t){document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')});document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('show')});document.querySelector('[onclick="switchTab(\''+t+'\')"]').classList.add('active');document.getElementById(t+'Panel').classList.add('show');refreshTab(t)}
+function refreshTab(t){if(t==='stock')renderStock();if(t==='sell'){fillSellSelect();renderSales()}if(t==='buy')renderBuys();if(t==='debt')renderDebts();if(t==='customers')renderCustomers();if(t==='report')showReport()}
+
+// ==================== کد کالا ====================
+function copyCode(id){
+    var code=generateCode(id);
+    navigator.clipboard.writeText(code).then(function(){showToast('📋 کد '+code+' کپی شد! ببر توی بخش فروش')});
+}
+
+// ==================== انبار ====================
+function addPart(){
+    var n=document.getElementById('partName').value.trim(),b=document.getElementById('partBrand').value.trim();
+    var c=document.getElementById('partCar').value.trim(),q=parseInt(document.getElementById('partQty').value)||1;
+    var bp=parseInt(document.getElementById('partBuyPrice').value)||0,sp=parseInt(document.getElementById('partSellPrice').value)||0;
+    if(!n){showToast('نام قطعه الزامیست');return}
+    stock.push({id:Date.now(),name:n,brand:b,car:c,qty:q,buyPrice:bp,sellPrice:sp});
+    localStorage.setItem('erfan_stock',JSON.stringify(stock));
+    ['partName','partBrand','partCar','partBuyPrice','partSellPrice'].forEach(function(i){document.getElementById(i).value=''});
+    document.getElementById('partQty').value=1;renderStock();updateStats();showToast('✅ افزوده شد');
+}
+function deletePart(id){if(!confirm('حذف؟'))return;stock=stock.filter(function(p){return p.id!==id});localStorage.setItem('erfan_stock',JSON.stringify(stock));renderStock();updateStats()}
+function renderStock(){
+    var q=document.getElementById('stockSearch')?document.getElementById('stockSearch').value.trim().toLowerCase():'';
+    var list=q?stock.filter(function(p){return p.name.toLowerCase().includes(q)||p.brand.toLowerCase().includes(q)||p.car.toLowerCase().includes(q)||generateCode(p.id).toLowerCase().includes(q)}):stock;
+    document.getElementById('stockCount').textContent=list.length;
+    var r='<tr><th>کد</th><th>قطعه</th><th>برند</th><th>خودرو</th><th>تعداد</th><th>خرید</th><th>فروش</th><th>عملیات</th></tr>';
+    if(!list.length)r+='<tr><td colspan="8" class="empty">خالی</td></tr>';
+    else list.forEach(function(p){
+        var code=generateCode(p.id);
+        r+='<tr><td><span class="code" onclick="copyCode('+p.id+')" title="کلیک کن کپی بشه">'+code+'</span></td><td>'+p.name+'</td><td>'+p.brand+'</td><td>'+p.car+'</td><td class="'+(p.qty<3?'low':'')+'">'+p.qty+'</td><td>'+p.buyPrice.toLocaleString('fa-IR')+'</td><td>'+p.sellPrice.toLocaleString('fa-IR')+'</td><td><button class="btn small" style="background:#f87171" onclick="deletePart('+p.id+')">🗑️</button></td></tr>';
+    });
+    document.getElementById('stockTable').innerHTML=r;
+}
+
+// ==================== جستجو با کد ====================
+function searchByCode(){
+    var code=document.getElementById('sellCode').value.trim().toUpperCase();
+    var container=document.getElementById('codeResult');
+    if(!code){container.innerHTML='';return}
+    
+    var found=stock.filter(function(p){return generateCode(p.id).includes(code)});
+    if(!found.length){container.innerHTML='<div class="result" style="color:#f87171">❌ کالایی با این کد پیدا نشد</div>';return}
+    
+    container.innerHTML=found.map(function(p){
+        return '<div class="result" style="cursor:pointer;border:2px solid var(--green)" onclick="selectByCode('+p.id+')">'+
+            '<b>'+generateCode(p.id)+'</b> - '+p.name+' ('+p.brand+') - 📦 '+p.qty+' عدد - 💰 '+p.sellPrice.toLocaleString('fa-IR')+' تومان'+
+            '<br><small style="color:var(--green)">👆 کلیک کن برای انتخاب</small></div>';
+    }).join('');
+}
+
+function selectByCode(id){
+    var p=stock.find(function(x){return x.id===id});
+    if(!p)return;
+    document.getElementById('sellPart').value=id;
+    document.getElementById('sellCode').value=generateCode(id);
+    document.getElementById('codeResult').innerHTML='<div class="result" style="border-color:var(--green)">✅ انتخاب شد: <b>'+p.name+'</b> - '+p.sellPrice.toLocaleString('fa-IR')+' تومان</div>';
+    fillSellInfo();
+}
+
+// ==================== فروش ====================
+function fillSellSelect(){var s=document.getElementById('sellPart');s.innerHTML='<option value="">یا از لیست انتخاب کن...</option>'+stock.filter(function(p){return p.qty>0}).map(function(p){return '<option value="'+p.id+'">'+generateCode(p.id)+' - '+p.name+' ('+p.brand+')</option>'}).join('')}
+function fillSellInfo(){var p=stock.find(function(x){return x.id===parseInt(document.getElementById('sellPart').value)});if(p){document.getElementById('sellUnitPrice').textContent=p.sellPrice.toLocaleString('fa-IR')+' تومان';document.getElementById('sellStock').textContent=p.qty+' عدد'}}
+function sellItem(){
+    var id=parseInt(document.getElementById('sellPart').value),qty=parseInt(document.getElementById('sellQty').value)||1;
+    var customer=document.getElementById('sellCustomer').value.trim()||'ناشناس',p=stock.find(function(x){return x.id===id});
+    if(!p){showToast('قطعه انتخاب کن');return}if(qty>p.qty){showToast('موجودی کافی نیست');return}
+    p.qty-=qty;var total=p.sellPrice*qty;
+    sales.unshift({id:Date.now(),partName:p.name,code:generateCode(p.id),customer:customer,qty:qty,price:p.sellPrice,total:total,date:new Date().toISOString()});
+    localStorage.setItem('erfan_stock',JSON.stringify(stock));localStorage.setItem('erfan_sales',JSON.stringify(sales));
+    document.getElementById('sellQty').value=1;document.getElementById('sellCustomer').value='';document.getElementById('sellCode').value='';document.getElementById('codeResult').innerHTML='';
+    renderStock();fillSellSelect();renderSales();updateStats();showToast('✅ فروخته شد: '+total.toLocaleString('fa-IR')+' تومان');
+}
+function renderSales(){
+    var today=new Date().toDateString(),list=sales.filter(function(s){return new Date(s.date).toDateString()===today});
+    var c=document.getElementById('todaySales');if(!list.length){c.innerHTML='<div class="empty">امروز فروشی نداشتی</div>';return}
+    c.innerHTML=list.map(function(s){return '<div class="list-item"><span><span style="color:var(--gold);font-size:0.75rem">'+s.code+'</span> - '+s.partName+' ×'+s.qty+' - '+s.customer+'</span><span class="amount plus">+'+s.total.toLocaleString('fa-IR')+' تومان</span></div>'}).join('');
+}
+
+// ==================== خرید ====================
+function addBuy(){
+    var n=document.getElementById('buyName').value.trim(),q=parseInt(document.getElementById('buyQty').value)||1;
+    var p=parseInt(document.getElementById('buyPrice').value)||0,s=document.getElementById('buySeller').value.trim();
+    if(!n||!p){showToast('نام و قیمت الزامیست');return}
+    buys.unshift({id:Date.now(),name:n,qty:q,price:p,seller:s,date:new Date().toISOString()});
+    localStorage.setItem('erfan_buys',JSON.stringify(buys));
+    ['buyName','buyPrice','buySeller'].forEach(function(i){document.getElementById(i).value=''});document.getElementById('buyQty').value=1;
+    renderBuys();updateStats();showToast('✅ ثبت شد');
+}
+function renderBuys(){
+    var c=document.getElementById('buyList');if(!buys.length){c.innerHTML='<div class="empty">خریدی ثبت نشده</div>';return}
+    c.innerHTML=buys.map(function(b){return '<div class="list-item"><span>'+b.name+' ×'+b.qty+' - '+b.seller+'</span><span class="amount minus">-'+b.price.toLocaleString('fa-IR')+' تومان</span></div>'}).join('');
+}
+
+// ==================== حساب‌ها ====================
+function addDebt(){
+    var t=document.getElementById('debtType').value,p=document.getElementById('debtPerson').value.trim();
+    var a=parseInt(document.getElementById('debtAmount').value)||0,d=document.getElementById('debtDesc').value.trim();
+    if(!p||!a){showToast('نام و مبلغ الزامیست');return}
+    debts.unshift({id:Date.now(),type:t,person:p,amount:a,desc:d,paid:false,date:new Date().toISOString()});
+    localStorage.setItem('erfan_debts',JSON.stringify(debts));
+    ['debtPerson','debtAmount','debtDesc'].forEach(function(i){document.getElementById(i).value=''});
+    renderDebts();updateStats();showToast('✅ ثبت شد');
+}
+function togglePaid(id){var d=debts.find(function(x){return x.id===id});if(d)d.paid=!d.paid;localStorage.setItem('erfan_debts',JSON.stringify(debts));renderDebts();updateStats()}
+function renderDebts(){
+    var c=document.getElementById('debtList');if(!debts.length){c.innerHTML='<div class="empty">حسابی ثبت نشده</div>';return}
+    c.innerHTML=debts.map(function(d){return '<div class="list-item" style="'+(d.paid?'opacity:0.5':'')+'"><span>'+d.person+' - '+d.desc+' <span class="tag '+(d.type==='debt'?'in':'out')+'">'+(d.type==='debt'?'طلب':'بدهی')+'</span></span><span class="amount '+(d.type==='debt'?'plus':'minus')+'">'+d.amount.toLocaleString('fa-IR')+' تومان '+(d.paid?'✅':'')+'</span><button class="btn small '+(d.paid?'gold':'green')+'" onclick="togglePaid('+d.id+')">'+(d.paid?'باز':'پرداخت')+'</button></div>'}).join('');
+}
+
+// ==================== مشتریان ====================
+function renderCustomers(){
+    var customers={};sales.forEach(function(s){if(!customers[s.customer])customers[s.customer]=0;customers[s.customer]+=s.total});
+    var list=Object.keys(customers).map(function(k){return{name:k,total:customers[k]}}).sort(function(a,b){return b.total-a.total});
+    var c=document.getElementById('customersList');if(!list.length){c.innerHTML='<div class="empty">مشتری نداشتی</div>';return}
+    c.innerHTML=list.map(function(x,i){return '<div class="list-item"><span>'+(i+1)+'. '+x.name+'</span><span class="amount plus">'+x.total.toLocaleString('fa-IR')+' تومان</span></div>'}).join('');
+}
+
+// ==================== گزارش ====================
+function showReport(){
+    var stockVal=stock.reduce(function(s,p){return s+(p.buyPrice*p.qty)},0);
+    var totalSales=sales.reduce(function(s,x){return s+x.total},0);
+    var totalBuys=buys.reduce(function(s,x){return s+x.price},0);
+    var totalDebt=debts.filter(function(d){return d.type==='debt'&&!d.paid}).reduce(function(s,d){return s+d.amount},0);
+    var totalCredit=debts.filter(function(d){return d.type==='credit'&&!d.paid}).reduce(function(s,d){return s+d.amount},0);
+    var profit=totalSales-totalBuys;
+    document.getElementById('reportContent').innerHTML=
+        '<p>📦 ارزش انبار: <b class="highlight">'+stockVal.toLocaleString('fa-IR')+' تومان</b></p>'+
+        '<p>💰 کل فروش: <b style="color:var(--green)">'+totalSales.toLocaleString('fa-IR')+' تومان</b></p>'+
+        '<p>📥 کل خرید: <b style="color:#f87171">'+totalBuys.toLocaleString('fa-IR')+' تومان</b></p>'+
+        '<p>📈 سود/زیان: <b style="color:'+(profit>=0?'var(--green)':'#f87171')+'">'+profit.toLocaleString('fa-IR')+' تومان</b></p>'+
+        '<p>💳 طلب: <b style="color:var(--green)">'+totalDebt.toLocaleString('fa-IR')+'</b> | بدهی: <b style="color:#f87171">'+totalCredit.toLocaleString('fa-IR')+'</b></p>'+
+        '<p>📋 قطعات: <b>'+stock.length+'</b> | کل موجودی: <b>'+stock.reduce(function(s,p){return s+p.qty},0)+' عدد</b></p>';
+}
+
+// ==================== آمار ====================
+function updateStats(){
+    var qty=stock.reduce(function(s,p){return s+p.qty},0);
+    var todayS=sales.filter(function(s){return new Date(s.date).toDateString()===new Date().toDateString()}).length;
+    var tDebt=debts.filter(function(d){return d.type==='debt'&&!d.paid}).length;
+    var tCredit=debts.filter(function(d){return d.type==='credit'&&!d.paid}).length;
+    document.getElementById('statsRow').innerHTML=
+        '<div class="stat c1"><div class="val">'+qty+'</div><div class="lbl">📦 موجودی</div></div>'+
+        '<div class="stat c2"><div class="val">'+todayS+'</div><div class="lbl">🛒 فروش امروز</div></div>'+
+        '<div class="stat c3"><div class="val">'+tDebt+'</div><div class="lbl">💳 طلب</div></div>'+
+        '<div class="stat c4"><div class="val">'+tCredit+'</div><div class="lbl">📤 بدهی</div></div>';
+}
+
+document.getElementById('headerDate').textContent=new Date().toLocaleDateString('fa-IR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+renderStock();fillSellSelect();renderSales();renderBuys();renderDebts();updateStats();
+</script>
+</body>
+</html>
